@@ -120,6 +120,8 @@ pip install -r requirements.txt
 
 ### **Start the Server**
 
+The server should be run as root.
+
 Before running the server, generate SSL certificates:
 ```bash
 cd server
