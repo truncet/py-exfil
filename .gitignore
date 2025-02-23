@@ -1,0 +1,9 @@
+venv
+
+testing
+
+*.tar.gz
+*.bin
+
+server.crt
+server.key
