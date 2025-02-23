@@ -59,8 +59,6 @@ def save_chunk(session_id, chunk_id, total_chunks, chunk_data, process_part=Fals
         CHUNK_STORAGE[session_id][chunk_id] = base64.b64decode(chunk_data)
         print(f"[+] Session {session_id}: Received full chunk {chunk_id}/{total_chunks}")
 
-    # print(f"[DEBUG] CHUNK_STORAGE after update: {CHUNK_STORAGE}")
-
 
 
 def icmp_listener():
